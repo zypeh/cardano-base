@@ -152,8 +152,7 @@ jobs:
         git clone https://github.com/supranational/blst
         cd blst
         ./build.sh
-        sudo install libblst.a /usr/local/lib/
-        sudo cp bindings/*.h /usr/local/include/
+        sudo install libblst.a /usr/local/lib/libblst.a
         cd ../..
 
     - name: Install blst (MacOS)
@@ -165,7 +164,6 @@ jobs:
         cd blst
         ./build.sh
         sudo install libblst.a /usr/local/lib/libblst.a
-        sudo cp bindings/*.h /usr/local/include/
         cd ../..
 
     - uses: haskell/actions/setup@v1
