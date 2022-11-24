@@ -45,6 +45,8 @@ jobs:
     env:
       # current ref from: 27.02.2022
       SECP256K1_REF: ac83be33d0956faf6b7f61a60ab524ef7d6a473a
+      # current ref from: 25.11.2022
+      BLST_REF: 03b5124029979755c752eec45f3c29674b558446
 
     steps:
     - uses: actions/checkout@v1
@@ -144,26 +146,13 @@ jobs:
         echo "SECP256K1_PATH=$SECP256K1_PATH"
         echo "$SECP256K1_PATH" >> $GITHUB_PATH
 
-    - name: Install blst (Linux)
-      if: matrix.os == 'ubuntu-latest'
+    - name: Install blst
       run: |
-        mkdir blst-sources
-        cd blst-sources
+        mkdir blst-sources && cd blst-sources
         git clone https://github.com/supranational/blst
         cd blst
+        git reset --hard $BLST_REF
         ./build.sh
-        sudo install libblst.a /usr/local/lib/libblst.a
-        cd ../..
-
-    - name: Install blst (MacOS)
-      if: matrix.os == 'macos-latest'
-      run: |
-        mkdir blst-sources
-        cd blst-sources
-        git clone https://github.com/supranational/blst
-        cd blst
-        ./build.sh
-        sudo install libblst.a /usr/local/lib/libblst.a
         cd ../..
 
     - uses: haskell/actions/setup@v1
@@ -205,13 +194,13 @@ jobs:
       run: cabal build all --only-dependencies
 
     - name: Build
-      run: cabal build all
+      run: cabal build all --extra-lib-dirs ${GITHUB_WORKSPACE}/blst-sources/blst
 
     - name: Git clone
       run: git clone https://github.com/input-output-hk/cardano-mainnet-mirror
 
     - name: Run tests
-      run: cabal test all
+      run: cabal test all --extra-lib-dirs ${GITHUB_WORKSPACE}/blst-sources/blst
 
     - name: Run benchmarks
-      run: cabal bench all
+      run: cabal bench all --extra-lib-dirs ${GITHUB_WORKSPACE}/blst-sources/blst
